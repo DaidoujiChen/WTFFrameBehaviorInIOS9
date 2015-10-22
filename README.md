@@ -1,28 +1,39 @@
 # WTFFrameBehaviorInIOS9
 
-這是一個莫名其妙的問題在 iOS9 上, 
-故事是這個樣子,  在使用 `UINavigationController` 的時候,  
-第一個 `UIViewController` 在 `viewWillAppear:` 的時候, 
-`self.view.frame` 是跟 screen size 一樣,
-當然, 在 `viewDidAppear:` 的時候也不會改變,
-以 `iPhone5` 來說的話就會是
+在 iOS8 與 iOS9 上, 使用 `UINavigationController` 且 `UIViewController` 的 layout 是由 xib 建置時, 在取得 `self.view.frame` 時, 會有些微的差異
+
+## iOS8 時
+首個 `UIViewController` 在 `viewWillAppear` 與 `viewDidAppear` 可以取得相同的 `self.view.frame`
 
 `````
-<SimpleViewController: 0x7c2f9970> viewWillAppear self.view.frame : {{0, 0}, {320, 568}}
-<SimpleViewController: 0x7c2f9970> viewDidAppear self.view.frame : {{0, 0}, {320, 568}}
+<SimpleViewController: 0x7a6e4730> viewWillAppear self.view.frame : {{0, 0}, {320, 568}}
+<SimpleViewController: 0x7a6e4730> viewDidAppear self.view.frame : {{0, 0}, {320, 568}}
 `````
 
-超正常的! 但是從第二個 `UIViewController` 開始, 即使 push 了同樣的一個東西, 卻會變成
+然後 push 第二個 `UIViewController` 進去時, 也可以得到相同的答案
 
 `````
-<SimpleViewController: 0x7c232e30> viewWillAppear self.view.frame : {{0, 0}, {600, 600}}
-<SimpleViewController: 0x7c232e30> viewDidAppear self.view.frame : {{0, 0}, {320, 568}}
+<SimpleViewController: 0x7a667f70> viewWillAppear self.view.frame : {{0, 0}, {320, 568}}
+<SimpleViewController: 0x7a667f70> viewDidAppear self.view.frame : {{0, 0}, {320, 568}}
 `````
 
-在 `viewWillAppear:` 的時候, `self.view.frame` 居然是 xib 的大小, 
-直到 `viewDidAppear:` 才會變回正常.
+## iOS9 時
+首個 `UIViewController` 在 `viewWillAppear` 與 `viewDidAppear` 也是可以取得相同的 `self.view.frame`
 
-stackoverflow 上也有類似的問題, [連結](http://stackoverflow.com/questions/32662851/ios-9-frame-no-longer-set-in-viewwillappear-after-uinavigationcontroller-pushvi)
+`````
+<SimpleViewController: 0x7ba4cf20> viewWillAppear self.view.frame : {{0, 0}, {320, 568}}
+<SimpleViewController: 0x7ba4cf20> viewDidAppear self.view.frame : {{0, 0}, {320, 568}}
+`````
 
-可以做個參考.
+但是第二個 `UIViewController` 時, 卻會產生不同的現象
+
+`````
+<SimpleViewController: 0x7b680010> viewWillAppear self.view.frame : {{0, 0}, {600, 600}}
+<SimpleViewController: 0x7b680010> viewDidAppear self.view.frame : {{0, 0}, {320, 568}}
+`````
+
+而這個 600x600 則是來自於 xib 預設的大小.
+
+## 奇異的點在於
+過去我們可以從 `viewWillAppear:` 就可以得知 `self.view.frame` 的大小, 在 iOS9 上則不一定可以.
 
